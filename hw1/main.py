@@ -45,55 +45,39 @@ def expgolomb_unsigned(n):
         headbits = dec2bin(0, len(trail_bits)-1)
         return headbits + trail_bits
 
-if __name__ == "__main__":
-    # img_path = "zanzara_lowres.jpg"
-    # img = cv2.imread(img_path)
-    # img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    # print(img_gray[:5])
-
-    img_path = "einst.pgm"
-    img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
-    img_gray = img
-
-    luminance = 0.2126 * img_gray[:, :] + 0.7152 * img_gray[:, :] + 0.0722 * img_gray[:, :]
-
+def entropy(image):
+    luminance = 0.2126 * image[:, :] + 0.7152 * image[:, :] + 0.0722 * image[:, :]
     # hist contains the counts for each bin in the histogram
     # bins contains the edges of the bins
     hist, bins = np.histogram(luminance.flatten(), 255)
-
-    # import matplotlib.pyplot as plt
-    # # Plot the histogram
-    # plt.hist(bins[:-1], bins, weights=hist)
-    # plt.xlabel('Luminance')
-    # plt.ylabel('Frequency')
-    # plt.title('Histogram of Luminance Values')
-    # plt.show()
-
     # Calculate the probability of each bin
     prob = hist / hist.sum()
     # Calculate the entropy
-    entropy = -np.sum(prob[prob != 0] * np.log2(prob[prob != 0]))
-    print("Entropy of the image: ", entropy)
-    # prob = hist / np.sum(hist)
-    # entropy = -np.sum(prob * np.log2(prob))
+    return -np.sum(prob[prob != 0] * np.log2(prob[prob != 0]))
 
-    # print("The entropy of the image is: " + str(entropy) + " bits")
+if __name__ == "__main__":
+    img_path = "einst.pgm"
+    img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
 
-    compressed_img_size = compressed_image_size_bits(img_gray)
-    rows, cols = img_gray.shape
+    img_entropy = entropy(img)
+    print("Entropy of the image: " + str(img_entropy))
+    print("The theoretical compression rate is: " + str(8 / img_entropy))
+
+    rows, cols = img.shape
     num_pixels = rows * cols
 
+    print("The image has " + str(num_pixels) + " pixels")
+
+    compressed_img_size = compressed_image_size_bits(img)
     print(
-        "The bitrate of the image is: "
+        "The bitrate of the image compressed with gzip is: "
         + str(compressed_img_size / num_pixels)
         + "bits per pixel"
     )
 
-    print("The theoretical compression rate is: " + str(8 / entropy))
-    print("the image has " + str(num_pixels) + " pixels")
     # codifica predittiva semplice
-
-    linear_image = img_gray.reshape(-1).astype(np.float64)
+    # trasformo l'immagine in un array
+    linear_image = img.reshape(-1).astype(np.float64)
     encoded_image = copy.deepcopy(linear_image)
     encoded_image[0] = linear_image[0] - 128
 
@@ -124,7 +108,7 @@ if __name__ == "__main__":
         codeword = expgolomb_signed(symbol)
         bit_count += len(str(codeword))
 
-    EG_bpp = bit_count/(rows*cols)
+    EG_bpp = bit_count/num_pixels
     print("bit per pixel con codifica exp_golomb: " + str(EG_bpp))
 
     
