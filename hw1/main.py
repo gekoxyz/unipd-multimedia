@@ -66,7 +66,7 @@ def simple_predictive_encoding(img):
     #     decoded_image[i] = buf
     # decoded_image = decoded_image.reshape(rows, cols).astype(np.uint8)
     prediction = np.array(prediction.reshape(rows, cols))
-    encoded_img = img - prediction
+    encoded_img = prediction
 
     encoded_img_entropy = entropy(encoded_img)
     print("The entropy of the encoded image is: " + str(encoded_img_entropy))
@@ -83,8 +83,8 @@ def simple_predictive_encoding(img):
 
 def advanced_predictive_encoding(img):
     rows, cols = img.shape
-    print("image shape: " + str(img.shape))
-    print(f"bit count: {rows * cols}")
+    print(f"image shape: {img.shape}")
+    print(f"pixel count: {rows * cols}")
 
     prediction = np.zeros((rows, cols))
     prediction[0, 0] = img[0, 0] - 128
@@ -111,7 +111,6 @@ def advanced_predictive_encoding(img):
                 v1 = img[n - 1, m]
                 v2 = img[n, m - 1]
                 v3 = img[n - 1, m - 1]
-                # print("calculating the median between: " + str(np.array((v1,v2,v3))))
                 prediction[n, m] = statistics.median((v1, v2, v3))
             else:
                 v1 = img[n - 1, m]
@@ -119,17 +118,14 @@ def advanced_predictive_encoding(img):
                 v3 = img[n - 1, m + 1]
                 prediction[n, m] = statistics.median((v1, v2, v3))
             m += 1
-
         n += 1
 
     encoded_img = img - prediction
     encoded_img_entropy = entropy(encoded_img)
-    print("The entropy of the encoded image is: " + str(encoded_img_entropy))
-    print(
-        "The obtainable compression rate is: "
-        + str(BITS_PER_PIXEL / encoded_img_entropy)
-    )
+    print(f"the entropy of the encoded image is: {encoded_img_entropy}")
+    print(f"the obtainable compression rate is: {BITS_PER_PIXEL / encoded_img_entropy}")
 
+    # reshaping the image array to a linear array to make the bit count easier
     encoded_prediction_linear = encoded_img.reshape(-1).astype(np.float64)
     bit_count = 0
     for symbol in encoded_prediction_linear:
@@ -137,13 +133,12 @@ def advanced_predictive_encoding(img):
 
     print(f"bit count: {bit_count}")
     EG_bpp = bit_count / num_pixels
-    print("bit per pixel con codifica exp_golomb: " + str(EG_bpp))
-
-    return
+    print(f"bit per pixel con codifica exp_golomb: {EG_bpp}")
 
 
 if __name__ == "__main__":
-    images = ["einst.pgm", "house.pgm", "lake.pgm"]
+    # images = ["einst.pgm", "house.pgm", "lake.pgm"]
+    images = ["einst.pgm"]
     for img_path in images:
         print(f"===== {img_path} =====")
         img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
@@ -168,31 +163,10 @@ if __name__ == "__main__":
         # )
 
         # compressione con codifica predittiva semplice
+        print("--- simple predictive encoding ---")
         simple_predictive_encoding(img)
 
         # compressione con codifica predittiva avanzata
+        print("--- advanced predictive encoding ---")
         advanced_predictive_encoding(img)
-
-
-
-
-# def dec2bin(dec_n, min_digits):
-#     # [2:] is to convert to binary and remove the '0b' prefix
-#     return bin(int(dec_n))[2:].zfill(min_digits)
-
-
-# def expgolomb_signed(n):
-#     if n > 0:
-#         return expgolomb_unsigned(2 * n - 1)
-#     else:
-#         return expgolomb_unsigned(-2 * n)
-
-
-# def expgolomb_unsigned(n):
-#     if n == 0:
-#         return 1
-#     else:
-#         trail_bits = dec2bin(n + 1, math.ceil(math.log2(n + 1)))
-#         headbits = dec2bin(0, len(trail_bits) - 1)
-#         return int(headbits + trail_bits)
 
