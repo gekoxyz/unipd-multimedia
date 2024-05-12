@@ -1,11 +1,9 @@
 #!/usr/bin/env python3
-import ping3
+from ping3 import ping
 import numpy as np
-# ping3.DEBUG = True
 import subprocess
 
-# server = "paris.testdebit.info"
-server = "1.1.1.1"
+server = "paris.testdebit.info"
 ping_tracerute_out_file = "ping_traceroute_out.txt"
 traceroute_out_file = "traceroute_out.txt"
 rtt_out_file = "rtt_out.csv"
@@ -21,7 +19,7 @@ def collect_traceroute_data():
   with open(ping_tracerute_out_file, "w") as file:
     while ttl > 0:
       file.write(f"TTL = {ttl}\n")
-      seconds = ping3.ping(server, unit="ms", ttl=ttl)
+      seconds = ping(server, unit="ms", ttl=ttl)
       file.write(f"{seconds}\n")
       ttl -= 1
     file.close()
@@ -55,13 +53,13 @@ def process_traceroute_data():
 # instance K tests must be ran
 def collect_rtt_data():
   # numero di pacchetti spediti
-  k = 30
-  payload_sizes = np.linspace(10, 1450, 20, dtype = int)
+  k = 75
+  payload_sizes = np.linspace(10, 1472, 20, dtype = int)
   with open(rtt_out_file, "w") as file:
-    file.write("time, size")
+    file.write("time, size\n")
     for payload_size in payload_sizes:
       for _ in range(k):
-        seconds = ping3.ping(server, unit='ms', size=payload_size)
+        seconds = ping(server, unit='ms', size=payload_size)
         file.write(f"{seconds}, {payload_size}\n")
     file.close()
 
