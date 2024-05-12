@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import ping3
 import numpy as np
 # ping3.DEBUG = True
@@ -6,13 +7,12 @@ import subprocess
 # server = "paris.testdebit.info"
 server = "1.1.1.1"
 ping_tracerute_out_file = "ping_traceroute_out.txt"
-traceroute_output_file = "traceroute_out.txt"
-k = 5 # numero di pacchetti spediti
-payload_sizes = np.linspace(10, 1450, 10, dtype = int)
+traceroute_out_file = "traceroute_out.txt"
+rtt_out_file = "rtt_out.csv"
 
-def collect_data():
+def collect_traceroute_data():
   # collect traceroute data
-  with open(traceroute_output_file, "w") as file:
+  with open(traceroute_out_file, "w") as file:
     process = subprocess.run(["traceroute", server], capture_output=True, text=True)
     file.write(str(process.stdout))
     file.close()
@@ -26,9 +26,9 @@ def collect_data():
       ttl -= 1
     file.close()
 
-def process_data():
+def process_traceroute_data():
   # process traceroute data
-  with open(traceroute_output_file, "r") as file:
+  with open(traceroute_out_file, "r") as file:
     lines = file.readlines()
     last_line = lines[-1]
     first_word = last_line.split()[0]
@@ -50,15 +50,27 @@ def process_data():
           break
     file.close()
 
+# save the ping data in the file 
+# the ping payload data must vary between 10 and 1472 bytes and for each
+# instance K tests must be ran
+def collect_rtt_data():
+  # numero di pacchetti spediti
+  k = 30
+  payload_sizes = np.linspace(10, 1450, 20, dtype = int)
+  with open(rtt_out_file, "w") as file:
+    file.write("time, size")
+    for payload_size in payload_sizes:
+      for _ in range(k):
+        seconds = ping3.ping(server, unit='ms', size=payload_size)
+        file.write(f"{seconds}, {payload_size}\n")
+    file.close()
+
+def process_rtt_data():
+  return
+
 if __name__ == "__main__":
-  # collect_data()
-  process_data()
+  # collect_traceroute_data()
+  # process_traceroute_data()
+  collect_rtt_data()
+  # process_rtt_data()
 
-
-
-  # with open(output_file, "w") as file:
-    # for payload_size in payload_sizes:
-    #   file.write(f"payload_size={payload_size}\n")
-    #   for i in range(k):
-    #     seconds = ping3.ping(server, unit='ms', size=payload_size)
-    #     file.write(f"{seconds}\n")
