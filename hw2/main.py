@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 from ping3 import ping
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 import subprocess
 
 server = "paris.testdebit.info"
@@ -56,19 +58,29 @@ def collect_rtt_data():
   k = 75
   payload_sizes = np.linspace(10, 1472, 20, dtype = int)
   with open(rtt_out_file, "w") as file:
-    file.write("time, size\n")
+    file.write("time,size\n")
     for payload_size in payload_sizes:
       for _ in range(k):
         seconds = ping(server, unit='ms', size=payload_size)
-        file.write(f"{seconds}, {payload_size}\n")
+        file.write(f"{seconds},{payload_size}\n")
     file.close()
 
 def process_rtt_data():
+  with open(rtt_out_file, 'r') as file:
+    df = pd.read_csv(file)
+    file.close()
+    # print(df.head)
+    # print()
+    # print(df.groupby('size').mean())
+    # print(df.columns)
+    # df.plot(kind='scatter', x='size', y='time')
+    df.plot()
+    plt.show()
   return
 
 if __name__ == "__main__":
   # collect_traceroute_data()
   # process_traceroute_data()
-  collect_rtt_data()
-  # process_rtt_data()
+  # collect_rtt_data()
+  process_rtt_data()
 
