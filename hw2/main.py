@@ -55,8 +55,9 @@ def process_traceroute_data():
 # instance K tests must be ran
 def collect_rtt_data():
   # numero di pacchetti spediti
-  k = 75
-  payload_sizes = np.linspace(10, 1472, 20, dtype = int)
+  k = 100
+  payload_sizes = np.linspace(10, 1472, 250, dtype = int)
+  print(f"starting the collection of {k * 250} samples. this will take ~30 mins")
   with open(rtt_out_file, "w") as file:
     file.write("time,size\n")
     for payload_size in payload_sizes:
@@ -92,6 +93,6 @@ def process_rtt_data():
 if __name__ == "__main__":
   # collect_traceroute_data()
   # process_traceroute_data()
-  # collect_rtt_data()
-  process_rtt_data()
+  collect_rtt_data()
+  # process_rtt_data()
 
