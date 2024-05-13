@@ -69,13 +69,24 @@ def process_rtt_data():
   with open(rtt_out_file, 'r') as file:
     df = pd.read_csv(file)
     file.close()
-    # print(df.head)
-    # print()
-    # print(df.groupby('size').mean())
-    # print(df.columns)
-    # df.plot(kind='scatter', x='size', y='time')
-    df.plot()
-    plt.show()
+
+    df.plot(kind='scatter', x='size', y='time')
+    plt.savefig('rtt_data.png')
+
+    df_clean = df.dropna()
+    x = df_clean["size"].values
+    y = df_clean["time"].values
+
+    coefs = np.polyfit(x, y, 1)
+    print(coefs)
+    payload_sizes = np.linspace(10, 1472, 20, dtype = int)
+    y = np.polyval(coefs, x)
+    plt.plot(x, y, color='purple')
+    plt.savefig("rtt_fit.png")
+
+    # coefs = np.polynomial.polynomial.polyfit(df.dropna()[["size"]].values, df.dropna()[["time"]].values, 1)
+    poly = np.poly1d(coefs)
+    print(poly(1000))  # evaluate the polynomial at x=1000
   return
 
 if __name__ == "__main__":
