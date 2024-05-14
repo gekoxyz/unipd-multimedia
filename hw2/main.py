@@ -56,7 +56,7 @@ def process_traceroute_data():
 def collect_rtt_data():
   # numero di pacchetti spediti
   k = 100
-  payload_sizes = np.linspace(10, 1472, 250, dtype = int)
+  payload_sizes = np.linspace(10, 1472, 75, dtype = int)
   print(f"starting the collection of {k * 250} samples. this will take ~30 mins")
   with open(rtt_out_file, "w") as file:
     file.write("time,size\n")
@@ -67,28 +67,38 @@ def collect_rtt_data():
     file.close()
 
 def process_rtt_data():
-  with open(rtt_out_file, 'r') as file:
+  with open("rtt_out.csv", "r") as file:
     df = pd.read_csv(file)
     file.close()
 
-    df.plot(kind='scatter', x='size', y='time')
-    plt.savefig('rtt_data.png')
+    print(df.dtypes)
 
     df_clean = df.dropna()
-    x = df_clean["size"].values
-    y = df_clean["time"].values
+    # x = df_clean["size"].values
+    # y = df_clean["time"].values
 
-    coefs = np.polyfit(x, y, 1)
-    print(coefs)
-    payload_sizes = np.linspace(10, 1472, 20, dtype = int)
-    y = np.polyval(coefs, x)
-    plt.plot(x, y, color='purple')
-    plt.savefig("rtt_fit.png")
+    print(df_clean.dtypes)
 
-    # coefs = np.polynomial.polynomial.polyfit(df.dropna()[["size"]].values, df.dropna()[["time"]].values, 1)
-    poly = np.poly1d(coefs)
-    print(poly(1000))  # evaluate the polynomial at x=1000
+    print(df_clean.head())
+
+    # min_time_per_size = df_clean.groupby('size')['time'].min()
+    # print(min_time_per_size)
+
+    # plt.scatter(x=min_time_per_size.index, y=min_time_per_size.values)
+    # plt.savefig('rtt_data.png')
+
+    # coefs = np.polyfit(x, y, 1)
+    # print(coefs)
+    # payload_sizes = np.linspace(10, 1472, 20, dtype = int)
+    # y = np.polyval(coefs, x)
+    # plt.plot(x, y, color='purple')
+    # plt.savefig("rtt_fit.png")
+
+    # poly = np.poly1d(coefs)
+    # print(poly(1000))  # evaluate the polynomial at x=1000
   return
+
+# coefs = np.polynomial.polynomial.polyfit(df.dropna()[["size"]].values, df.dropna()[["time"]].values, 1)
 
 if __name__ == "__main__":
   # collect_traceroute_data()
