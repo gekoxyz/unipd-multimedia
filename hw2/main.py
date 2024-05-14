@@ -8,7 +8,7 @@ import subprocess
 server = "paris.testdebit.info"
 ping_tracerute_out_file = "ping_traceroute_out.txt"
 traceroute_out_file = "traceroute_out.txt"
-rtt_out_file = "rtt_out.csv"
+rtt_out_file = "rtt_out_medium.csv"
 
 def collect_traceroute_data():
   # collect traceroute data
@@ -67,42 +67,44 @@ def collect_rtt_data():
     file.close()
 
 def process_rtt_data():
-  with open("rtt_out.csv", "r") as file:
+  with open(rtt_out_file, "r") as file:
     df = pd.read_csv(file)
     file.close()
 
-    print(df.dtypes)
-
     df_clean = df.dropna()
-    # x = df_clean["size"].values
-    # y = df_clean["time"].values
 
-    print(df_clean.dtypes)
+    x = df_clean["size"].values
+    y = df_clean["time"].values
 
-    print(df_clean.head())
+    # plotting the data
+    plt.figure()
+    plt.scatter(x, y, alpha=0.5)
+    plt.savefig("rtt_data.png", dpi=300)
 
-    # min_time_per_size = df_clean.groupby('size')['time'].min()
-    # print(min_time_per_size)
+    # plotting the min data and fitting a straight line to it
+    min_time_per_size = df_clean.groupby('size')['time'].min()
+    plt.figure()
+    plt.scatter(x=min_time_per_size.index, y=min_time_per_size.values, alpha=0.5)
+    plt.savefig('rtt_min_data.png')
+    coefs = np.polyfit(min_time_per_size.index, min_time_per_size.values, 1)
+    y = np.polyval(coefs, x)
+    plt.plot(x, y, color='purple')
+    plt.savefig("rtt_min_fit.png")
 
-    # plt.scatter(x=min_time_per_size.index, y=min_time_per_size.values)
-    # plt.savefig('rtt_data.png')
+    # plotting the max data and fitting a straight line to it
+    max_time_per_size = df_clean.groupby('size')['time'].max()
+    plt.figure()
+    plt.scatter(x=max_time_per_size.index, y=max_time_per_size.values, alpha=0.5)
+    plt.savefig('rtt_max_data.png')
+    coefs = np.polyfit(max_time_per_size.index, max_time_per_size.values, 1)
+    y = np.polyval(coefs, x)
+    plt.plot(x, y, color='purple')
+    plt.savefig("rtt_max_fit.png")
 
-    # coefs = np.polyfit(x, y, 1)
-    # print(coefs)
-    # payload_sizes = np.linspace(10, 1472, 20, dtype = int)
-    # y = np.polyval(coefs, x)
-    # plt.plot(x, y, color='purple')
-    # plt.savefig("rtt_fit.png")
-
-    # poly = np.poly1d(coefs)
-    # print(poly(1000))  # evaluate the polynomial at x=1000
-  return
-
-# coefs = np.polynomial.polynomial.polyfit(df.dropna()[["size"]].values, df.dropna()[["time"]].values, 1)
 
 if __name__ == "__main__":
   # collect_traceroute_data()
   # process_traceroute_data()
-  collect_rtt_data()
-  # process_rtt_data()
+  # collect_rtt_data()
+  process_rtt_data()
 
