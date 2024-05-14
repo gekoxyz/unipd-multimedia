@@ -57,7 +57,7 @@ def collect_rtt_data():
   # numero di pacchetti spediti
   k = 100
   payload_sizes = np.linspace(10, 1472, 75, dtype = int)
-  print(f"starting the collection of {k * 250} samples. this will take ~30 mins")
+  print(f"starting the collection of {k * 75} samples. this will take ~15 mins")
   with open(rtt_out_file, "w") as file:
     file.write("time,size\n")
     for payload_size in payload_sizes:
@@ -90,6 +90,7 @@ def process_rtt_data():
     y = np.polyval(coefs, x)
     plt.plot(x, y, color="purple")
     plt.savefig("rtt_min_fit.png")
+    print(f"min rtt coefs: {coefs}")
 
     # plotting the max data and fitting a straight line to it
     max_time_per_size = df_clean.groupby("size")["time"].max()
@@ -110,6 +111,16 @@ def process_rtt_data():
     y = np.polyval(coefs, x)
     plt.plot(x, y, color="purple")
     plt.savefig("rtt_avg_fit.png")
+
+    # plotting the stddev of the data and fitting a straight line to it
+    stddev_time_per_size = df_clean.groupby("size")["time"].std()
+    plt.figure()
+    plt.scatter(x=stddev_time_per_size.index, y=stddev_time_per_size.values, alpha=0.5)
+    plt.savefig("rtt_stddev_data.png")
+    coefs = np.polyfit(stddev_time_per_size.index, stddev_time_per_size.values, 1)
+    y = np.polyval(coefs, x)
+    plt.plot(x, y, color="purple")
+    plt.savefig("rtt_stddev_fit.png")
 
 if __name__ == "__main__":
   # collect_traceroute_data()
