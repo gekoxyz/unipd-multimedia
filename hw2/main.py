@@ -62,7 +62,7 @@ def collect_rtt_data():
     file.write("time,size\n")
     for payload_size in payload_sizes:
       for _ in range(k):
-        seconds = ping(server, unit='ms', size=payload_size)
+        seconds = ping(server, unit="ms", size=payload_size)
         file.write(f"{seconds},{payload_size}\n")
     file.close()
 
@@ -82,25 +82,34 @@ def process_rtt_data():
     plt.savefig("rtt_data.png", dpi=300)
 
     # plotting the min data and fitting a straight line to it
-    min_time_per_size = df_clean.groupby('size')['time'].min()
+    min_time_per_size = df_clean.groupby("size")["time"].min()
     plt.figure()
     plt.scatter(x=min_time_per_size.index, y=min_time_per_size.values, alpha=0.5)
-    plt.savefig('rtt_min_data.png')
+    plt.savefig("rtt_min_data.png")
     coefs = np.polyfit(min_time_per_size.index, min_time_per_size.values, 1)
     y = np.polyval(coefs, x)
-    plt.plot(x, y, color='purple')
+    plt.plot(x, y, color="purple")
     plt.savefig("rtt_min_fit.png")
 
     # plotting the max data and fitting a straight line to it
-    max_time_per_size = df_clean.groupby('size')['time'].max()
+    max_time_per_size = df_clean.groupby("size")["time"].max()
     plt.figure()
     plt.scatter(x=max_time_per_size.index, y=max_time_per_size.values, alpha=0.5)
-    plt.savefig('rtt_max_data.png')
+    plt.savefig("rtt_max_data.png")
     coefs = np.polyfit(max_time_per_size.index, max_time_per_size.values, 1)
     y = np.polyval(coefs, x)
-    plt.plot(x, y, color='purple')
+    plt.plot(x, y, color="purple")
     plt.savefig("rtt_max_fit.png")
 
+    # plotting the avg data and fitting a straight line to it
+    avg_time_per_size = df_clean.groupby("size")["time"].mean()
+    plt.figure()
+    plt.scatter(x=avg_time_per_size.index, y=avg_time_per_size.values, alpha=0.5)
+    plt.savefig("rtt_avg_data.png")
+    coefs = np.polyfit(avg_time_per_size.index, avg_time_per_size.values, 1)
+    y = np.polyval(coefs, x)
+    plt.plot(x, y, color="purple")
+    plt.savefig("rtt_avg_fit.png")
 
 if __name__ == "__main__":
   # collect_traceroute_data()
